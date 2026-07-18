@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "VELORA — The Art of Chocolate"
+version = "1.0.0"
+id = "artifacts/velora"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19013
+
+[services.development]
+run = "pnpm --filter @workspace/velora run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/velora", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/velora/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19013"
+BASE_PATH = "/"
