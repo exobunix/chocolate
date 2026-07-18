@@ -44,10 +44,15 @@ export default function Footer() {
           <div>
             <h4 className="font-medium tracking-widest uppercase text-sm mb-6">Shop</h4>
             <ul className="space-y-4">
-              {['All Collections', 'Dark Chocolate', 'Truffles & Pralines', 'Gift Boxes'].map(link => (
-                <li key={link}>
-                  <Link href="#" className="text-foreground/60 hover:text-primary transition-colors text-sm">
-                    {link}
+              {[
+                { label: 'All Collections', href: '/collections' },
+                { label: 'Dark Chocolate',  href: '/collections' },
+                { label: 'Truffles & Pralines', href: '/shop' },
+                { label: 'Gift Boxes',      href: '/gifts' },
+              ].map(({ label, href }) => (
+                <li key={label}>
+                  <Link href={href} className="text-foreground/60 hover:text-primary transition-colors text-sm">
+                    {label}
                   </Link>
                 </li>
               ))}
@@ -57,10 +62,15 @@ export default function Footer() {
           <div>
             <h4 className="font-medium tracking-widest uppercase text-sm mb-6">About</h4>
             <ul className="space-y-4">
-              {['Our Story', 'Ingredients', 'Sustainability', 'Careers'].map(link => (
-                <li key={link}>
-                  <Link href="#" className="text-foreground/60 hover:text-primary transition-colors text-sm">
-                    {link}
+              {[
+                { label: 'Our Story',     href: '/story' },
+                { label: 'Ingredients',   href: '/story' },
+                { label: 'Sustainability', href: '/story' },
+                { label: 'Careers',       href: '/contact' },
+              ].map(({ label, href }) => (
+                <li key={label}>
+                  <Link href={href} className="text-foreground/60 hover:text-primary transition-colors text-sm">
+                    {label}
                   </Link>
                 </li>
               ))}
@@ -70,10 +80,15 @@ export default function Footer() {
           <div>
             <h4 className="font-medium tracking-widest uppercase text-sm mb-6">Support</h4>
             <ul className="space-y-4">
-              {['Contact Us', 'FAQ', 'Shipping & Returns', 'Track Order'].map(link => (
-                <li key={link}>
-                  <Link href="#" className="text-foreground/60 hover:text-primary transition-colors text-sm">
-                    {link}
+              {[
+                { label: 'Contact Us',         href: '/contact' },
+                { label: 'FAQ',                href: '/contact' },
+                { label: 'Shipping & Returns', href: '/contact' },
+                { label: 'Track Order',        href: '/contact' },
+              ].map(({ label, href }) => (
+                <li key={label}>
+                  <Link href={href} className="text-foreground/60 hover:text-primary transition-colors text-sm">
+                    {label}
                   </Link>
                 </li>
               ))}
