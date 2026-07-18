@@ -1,104 +1,202 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { Search, User, ShoppingCart, Menu, X } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
+import { Search, User, ShoppingCart, Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+
+const navLinks = [
+  { label: 'Shop', href: '/shop', section: 'shop' },
+  { label: 'Collections', href: '/collections' },
+  { label: 'Gifts', href: '/gifts', section: 'gifts' },
+  { label: 'Story', href: '/story', section: 'story' },
+  { label: 'Contact', href: '/contact' },
+];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { count, openCart } = useCart();
+  const { user, openAuth, logout } = useAuth();
+  const [location] = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handler = () => setUserMenuOpen(false);
+    setTimeout(() => document.addEventListener('click', handler), 0);
+    return () => document.removeEventListener('click', handler);
+  }, [userMenuOpen]);
+
+  const handleNavClick = (link: typeof navLinks[0]) => {
+    setIsMobileOpen(false);
+    if (link.section && location === '/') {
+      const el = document.getElementById(link.section);
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-transparent ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
         isScrolled
-          ? 'bg-background/80 backdrop-blur-md border-border/50 py-4 shadow-sm'
-          : 'bg-transparent py-6'
+          ? 'bg-[#0a0402]/85 backdrop-blur-xl border-[#c9a84c]/10 py-3 shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
+          : 'bg-transparent border-transparent py-5'
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="text-3xl font-serif tracking-widest text-primary z-50">
-          VELORA
+        {/* Logo */}
+        <Link href="/" className="z-50 flex flex-col leading-none">
+          <span className="text-2xl font-serif tracking-[0.25em] text-[#c9a84c]">VELORA</span>
+          <span className="text-[9px] tracking-[0.3em] text-[#c9a84c]/50 uppercase">The Art of Chocolate</span>
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {['Shop', 'Collections', 'Gifts', 'Story', 'Contact'].map((item) => (
+          {navLinks.map(link => (
             <Link
-              key={item}
-              href={`/${item.toLowerCase()}`}
-              className="text-sm uppercase tracking-widest hover:text-primary transition-colors text-foreground/80 font-medium"
+              key={link.label}
+              href={link.href}
+              onClick={() => handleNavClick(link)}
+              className={`text-xs uppercase tracking-[0.2em] font-medium transition-colors relative group ${
+                location === link.href ? 'text-[#c9a84c]' : 'text-white/70 hover:text-white'
+              }`}
             >
-              {item}
+              {link.label}
+              <span className={`absolute -bottom-1 left-0 h-px bg-[#c9a84c] transition-all duration-300 ${
+                location === link.href ? 'w-full' : 'w-0 group-hover:w-full'
+              }`} />
             </Link>
           ))}
         </nav>
 
         {/* Icons */}
-        <div className="hidden md:flex items-center gap-6 z-50">
-          <button className="text-foreground/80 hover:text-primary transition-colors" data-testid="button-search">
-            <Search className="w-5 h-5" />
+        <div className="hidden md:flex items-center gap-5 z-50">
+          <button className="text-white/60 hover:text-[#c9a84c] transition-colors p-1">
+            <Search className="w-4.5 h-4.5" style={{ width: 18, height: 18 }} />
           </button>
-          <button className="text-foreground/80 hover:text-primary transition-colors" data-testid="button-user">
-            <User className="w-5 h-5" />
-          </button>
-          <button className="text-foreground/80 hover:text-primary transition-colors relative" data-testid="button-cart">
-            <ShoppingCart className="w-5 h-5" />
-            <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-              0
-            </span>
+
+          {/* User button */}
+          <div className="relative">
+            <button
+              onClick={() => user ? setUserMenuOpen(o => !o) : openAuth('login')}
+              className="flex items-center gap-1.5 text-white/60 hover:text-[#c9a84c] transition-colors p-1"
+            >
+              {user ? (
+                <>
+                  <div className="w-7 h-7 rounded-full bg-[#c9a84c]/20 border border-[#c9a84c]/40 flex items-center justify-center">
+                    <span className="text-[#c9a84c] text-xs font-serif font-medium">{user.name.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <ChevronDown className="w-3 h-3 text-[#c9a84c]/60" />
+                </>
+              ) : (
+                <User style={{ width: 18, height: 18 }} />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {userMenuOpen && user && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-52 bg-[#0d0502] border border-[#c9a84c]/15 rounded-xl shadow-2xl overflow-hidden"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="px-4 py-3 border-b border-white/5">
+                    <p className="text-sm font-medium truncate">{user.name}</p>
+                    <p className="text-xs text-white/40 truncate">{user.email}</p>
+                  </div>
+                  <div className="p-1.5">
+                    <button
+                      onClick={() => { logout(); setUserMenuOpen(false); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white/60 hover:text-red-400 hover:bg-red-400/10 transition-colors text-left"
+                    >
+                      <LogOut className="w-3.5 h-3.5" /> Sign Out
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Cart button */}
+          <button
+            onClick={openCart}
+            className="relative text-white/60 hover:text-[#c9a84c] transition-colors p-1"
+          >
+            <ShoppingCart style={{ width: 18, height: 18 }} />
+            <AnimatePresence>
+              {count > 0 && (
+                <motion.span
+                  key={count}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  className="absolute -top-1.5 -right-1.5 bg-[#c9a84c] text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center"
+                >
+                  {count > 9 ? '9+' : count}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
         </div>
 
-        {/* Mobile Toggle */}
-        <button
-          className="md:hidden z-50 text-foreground"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          data-testid="button-mobile-menu"
-        >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile menu toggle */}
+        <div className="md:hidden flex items-center gap-3 z-50">
+          <button onClick={openCart} className="relative text-white/70 hover:text-[#c9a84c] transition-colors">
+            <ShoppingCart className="w-5 h-5" />
+            {count > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-[#c9a84c] text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{count}</span>
+            )}
+          </button>
+          <button onClick={() => setIsMobileOpen(o => !o)} className="text-white/70 hover:text-white">
+            {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
+        {isMobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg p-6 flex flex-col gap-6 md:hidden"
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-full left-0 right-0 bg-[#0a0402]/95 backdrop-blur-xl border-b border-[#c9a84c]/10 px-6 py-8 flex flex-col gap-6 md:hidden"
           >
-            {['Shop', 'Collections', 'Gifts', 'Story', 'Contact'].map((item) => (
+            {navLinks.map(link => (
               <Link
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="text-lg uppercase tracking-widest hover:text-primary transition-colors text-foreground/90 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
+                key={link.label}
+                href={link.href}
+                onClick={() => handleNavClick(link)}
+                className="text-sm uppercase tracking-[0.2em] text-white/70 hover:text-[#c9a84c] transition-colors font-medium"
               >
-                {item}
+                {link.label}
               </Link>
             ))}
-            <div className="flex items-center gap-6 pt-6 border-t border-border/50">
-              <button className="text-foreground/80 hover:text-primary transition-colors flex gap-2 items-center">
-                <Search className="w-5 h-5" /> Search
-              </button>
-              <button className="text-foreground/80 hover:text-primary transition-colors flex gap-2 items-center">
-                <User className="w-5 h-5" /> Account
-              </button>
-              <button className="text-foreground/80 hover:text-primary transition-colors flex gap-2 items-center">
-                <ShoppingCart className="w-5 h-5" /> Cart (0)
-              </button>
+            <div className="pt-4 border-t border-white/5 flex items-center gap-4">
+              {user ? (
+                <button onClick={() => { logout(); setIsMobileOpen(false); }} className="flex items-center gap-2 text-sm text-red-400">
+                  <LogOut className="w-4 h-4" /> Sign Out ({user.name})
+                </button>
+              ) : (
+                <>
+                  <button onClick={() => { openAuth('login'); setIsMobileOpen(false); }} className="text-sm text-white/60 hover:text-[#c9a84c]">Sign In</button>
+                  <button onClick={() => { openAuth('register'); setIsMobileOpen(false); }} className="text-sm bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] px-4 py-2 rounded-full">Create Account</button>
+                </>
+              )}
             </div>
           </motion.div>
         )}
