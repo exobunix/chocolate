@@ -3,26 +3,28 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
-import { CartProvider } from '@/context/CartContext';
-import { AuthProvider } from '@/context/AuthContext';
-import CartDrawer from '@/components/CartDrawer';
-import AuthModal from '@/components/AuthModal';
+import { SiteConfigProvider } from '@/context/SiteConfigContext';
+import { CartProvider }       from '@/context/CartContext';
+import { AuthProvider }       from '@/context/AuthContext';
+import CartDrawer  from '@/components/CartDrawer';
+import AuthModal   from '@/components/AuthModal';
 
-import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import Marquee from '@/components/Marquee';
-import Products from '@/components/Products';
-import Process from '@/components/Process';
-import Gifts from '@/components/Gifts';
+import Navbar      from '@/components/Navbar';
+import Hero        from '@/components/Hero';
+import Marquee     from '@/components/Marquee';
+import Products    from '@/components/Products';
+import Process     from '@/components/Process';
+import Gifts       from '@/components/Gifts';
 import Testimonials from '@/components/Testimonials';
-import Footer from '@/components/Footer';
+import Footer      from '@/components/Footer';
 
-import ShopPage from '@/pages/Shop';
+import ShopPage        from '@/pages/Shop';
 import CollectionsPage from '@/pages/Collections';
-import StoryPage from '@/pages/Story';
-import GiftsPage from '@/pages/GiftsPage';
-import ContactPage from '@/pages/Contact';
-import NotFound from '@/pages/not-found';
+import StoryPage       from '@/pages/Story';
+import GiftsPage       from '@/pages/GiftsPage';
+import ContactPage     from '@/pages/Contact';
+import AdminPanel      from '@/pages/admin/AdminPanel';
+import NotFound        from '@/pages/not-found';
 
 const queryClient = new QueryClient();
 
@@ -42,20 +44,33 @@ function Home() {
   );
 }
 
-function AppRoutes() {
+function StoreFront() {
   return (
     <>
       <Navbar />
       <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/shop" component={ShopPage} />
+        <Route path="/"            component={Home} />
+        <Route path="/shop"        component={ShopPage} />
         <Route path="/collections" component={CollectionsPage} />
-        <Route path="/story" component={StoryPage} />
-        <Route path="/gifts" component={GiftsPage} />
-        <Route path="/contact" component={ContactPage} />
+        <Route path="/story"       component={StoryPage} />
+        <Route path="/gifts"       component={GiftsPage} />
+        <Route path="/contact"     component={ContactPage} />
         <Route component={NotFound} />
       </Switch>
+      <CartDrawer />
+      <AuthModal />
     </>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Switch>
+      {/* Admin panel — no site chrome */}
+      <Route path="/admin" component={AdminPanel} />
+      {/* Everything else gets the full storefront */}
+      <Route component={StoreFront} />
+    </Switch>
   );
 }
 
@@ -63,16 +78,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <CartProvider>
-          <AuthProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-              <AppRoutes />
-              <CartDrawer />
-              <AuthModal />
-            </WouterRouter>
-            <Toaster />
-          </AuthProvider>
-        </CartProvider>
+        <SiteConfigProvider>
+          <CartProvider>
+            <AuthProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+                <AppRoutes />
+              </WouterRouter>
+              <Toaster />
+            </AuthProvider>
+          </CartProvider>
+        </SiteConfigProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

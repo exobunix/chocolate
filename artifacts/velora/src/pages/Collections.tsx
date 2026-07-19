@@ -3,57 +3,55 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Check } from 'lucide-react';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { useSiteConfig } from '@/context/SiteConfigContext';
+import type { Product } from '@/context/SiteConfigContext';
 import heroImg from '@assets/Image-396_1784381276324.jpg';
 import collectionsImg from '@assets/Image-455_1784381276324.jpg';
 import processImg from '@assets/Image-970_1784381276323.jpg';
 
-const collections = [
+const FALLBACK_IMAGES = [heroImg, collectionsImg, processImg];
+
+const COLLECTION_META = [
   {
     id: 'dark',
     label: 'Dark Chocolate',
+    categories: ['Bars'],
     headline: 'Pure. Intense. Unforgettable.',
     sub: 'Our signature single-origin dark bars sourced from the finest cacao farms in Ecuador and Ghana.',
     color: 'from-[#1a0a05] to-[#0d0502]',
     image: heroImg,
-    products: [
-      { id: 101, name: 'Signature Dark Bar', desc: '70% Single Origin', price: 14.00 },
-      { id: 102, name: '85% Grand Cru', desc: 'Ecuador Origin', price: 18.00 },
-      { id: 103, name: 'Dark Infusion', desc: 'Sea Salt & Almond', price: 22.00 },
-    ]
   },
   {
     id: 'pralines',
     label: 'Pralines & Truffles',
+    categories: ['Pralines', 'Truffles'],
     headline: 'Crafted with obsessive precision.',
     sub: 'Each praline is hand-rolled and finished individually by our master chocolatiers every morning.',
     color: 'from-[#2a1309] to-[#180a04]',
     image: collectionsImg,
-    products: [
-      { id: 104, name: 'Hazelnut Praline Box', desc: '12 Pieces', price: 42.00 },
-      { id: 105, name: 'Velvet Truffles', desc: '16 Pieces', price: 36.00 },
-      { id: 106, name: 'Cocoa Bonbons', desc: '12 Pieces', price: 34.00 },
-    ]
   },
   {
     id: 'gifts',
     label: 'Gift Collections',
+    categories: ['Gifts'],
     headline: 'The gift they never forget.',
     sub: 'Curated gift boxes wrapped in our signature noir packaging with a hand-tied gold ribbon.',
     color: 'from-[#c9a84c]/20 to-[#1a0a05]',
     image: processImg,
-    products: [
-      { id: 107, name: 'Gold Collection Box', desc: '12-Piece Assorted', price: 64.00 },
-      { id: 108, name: 'Noir Gift Box', desc: '24 Pieces', price: 68.00 },
-      { id: 109, name: 'Discovery Set', desc: '6 Signature Flavors', price: 38.00 },
-    ]
   },
 ];
 
-function ProductCard({ product }: { product: { id: number; name: string; desc: string; price: number } }) {
+function ProductCard({ product, fallbackImg }: { product: Product; fallbackImg: string }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const handleAdd = () => {
-    addItem({ id: product.id, name: product.name, desc: product.desc, price: product.price });
+    addItem({
+      id: product.id,
+      name: product.name,
+      desc: product.desc,
+      price: product.price,
+      image: product.imageUrl || fallbackImg,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
@@ -80,8 +78,12 @@ function ProductCard({ product }: { product: { id: number; name: string; desc: s
 }
 
 export default function CollectionsPage() {
+  const { config } = useSiteConfig();
   const [active, setActive] = useState('dark');
-  const current = collections.find(c => c.id === active)!;
+  const current = COLLECTION_META.find(c => c.id === active)!;
+
+  const visibleProducts = config.products.filter(p => p.visible);
+  const currentProducts = visibleProducts.filter(p => current.categories.includes(p.category));
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-20">
@@ -105,7 +107,7 @@ export default function CollectionsPage() {
       {/* Collection Tabs */}
       <div className="container mx-auto px-6 py-16">
         <div className="flex flex-wrap gap-3 mb-16">
-          {collections.map(c => (
+          {COLLECTION_META.map(c => (
             <button key={c.id} onClick={() => setActive(c.id)}
               className={`px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-medium transition-all border ${
                 active === c.id ? 'bg-primary text-black border-primary' : 'border-border text-foreground/60 hover:border-primary/40'
@@ -135,9 +137,19 @@ export default function CollectionsPage() {
             <div>
               <h2 className="text-3xl md:text-4xl font-serif mb-4 leading-tight">{current.headline}</h2>
               <p className="text-foreground/60 mb-10 leading-relaxed">{current.sub}</p>
-              <div className="space-y-1">
-                {current.products.map(p => <ProductCard key={p.id} product={p} />)}
-              </div>
+
+              {currentProducts.length > 0 ? (
+                <div className="space-y-1">
+                  {currentProducts.map((p, i) => (
+                    <ProductCard key={p.id} product={p} fallbackImg={FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]} />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-foreground/30 text-sm border border-border/20 rounded-xl">
+                  No products in this collection yet.
+                </div>
+              )}
+
               <motion.div className="mt-10 p-5 bg-card/40 border border-border/30 rounded-2xl text-center"
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                 <p className="text-xs text-foreground/40 tracking-widest uppercase">All pieces handcrafted daily</p>

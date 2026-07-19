@@ -2,50 +2,35 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-
+import { useSiteConfig } from '@/context/SiteConfigContext';
 import collectionsImg from '@assets/Image-455_1784381276324.jpg';
 import heroImg from '@assets/Image-396_1784381276324.jpg';
 import processImg from '@assets/Image-970_1784381276323.jpg';
 
-const products = [
-  { id: 1, name: 'Hazelnut Praline Box', desc: '12 Pieces', price: 42.00, tag: 'Bestseller', category: 'Pralines',
-    image: collectionsImg, objectPosition: '10% 60%' },
-  { id: 2, name: 'Velvet Truffles', desc: '16 Pieces', price: 36.00, tag: 'Bestseller', category: 'Truffles',
-    image: collectionsImg, objectPosition: '50% 60%' },
-  { id: 3, name: 'Salted Caramel Squares', desc: '12 Pieces', price: 38.00, tag: 'New', category: 'Bars',
-    image: collectionsImg, objectPosition: '85% 60%' },
-  { id: 4, name: 'Noir Gift Box', desc: '24 Pieces', price: 68.00, tag: 'Limited', category: 'Gifts',
-    image: collectionsImg, objectPosition: '10% 85%' },
-  { id: 5, name: 'Cocoa Bonbons', desc: '12 Pieces', price: 34.00, tag: '', category: 'Truffles',
-    image: collectionsImg, objectPosition: '50% 85%' },
-  { id: 6, name: 'Signature Dark Bar', desc: '70% Single Origin', price: 14.00, tag: 'Signature', category: 'Bars',
-    image: heroImg, objectPosition: '60% 40%' },
-  { id: 7, name: 'Gold Collection Gift Box', desc: '12-Piece Assorted', price: 64.00, tag: 'Bestseller', category: 'Gifts',
-    image: heroImg, objectPosition: '80% 70%' },
-  { id: 8, name: 'Dark Chocolate Truffles', desc: '8 Pieces', price: 32.00, tag: '', category: 'Truffles',
-    image: processImg, objectPosition: '50% 90%' },
-  { id: 9, name: 'Single Origin 70%', desc: 'Full Bar', price: 28.00, tag: 'New', category: 'Bars',
-    image: processImg, objectPosition: '50% 50%' },
-];
-
-const categories = ['All', 'Bars', 'Pralines', 'Truffles', 'Gifts'];
+// Fallback image pool
+const FALLBACK_IMAGES = [collectionsImg, heroImg, processImg, collectionsImg, heroImg, processImg, collectionsImg, heroImg, processImg];
 
 const tagColors: Record<string, string> = {
   Bestseller: 'border-[#c9a84c]/50 text-[#c9a84c]',
-  Limited: 'border-red-400/40 text-red-300',
-  New: 'border-green-400/40 text-green-300',
-  Signature: 'border-purple-400/40 text-purple-300',
+  Limited:    'border-red-400/40 text-red-300',
+  New:        'border-green-400/40 text-green-300',
+  Signature:  'border-purple-400/40 text-purple-300',
 };
+
+const categories = ['All', 'Bars', 'Pralines', 'Truffles', 'Gifts'];
 
 export default function Products() {
   const [activeFilter, setActiveFilter] = useState('All');
   const { addItem } = useCart();
   const [added, setAdded] = useState<Record<number, boolean>>({});
+  const { config } = useSiteConfig();
 
-  const filtered = activeFilter === 'All' ? products : products.filter(p => p.category === activeFilter);
+  const visibleProducts = config.products.filter(p => p.visible);
+  const filtered = activeFilter === 'All' ? visibleProducts : visibleProducts.filter(p => p.category === activeFilter);
 
-  const handleAdd = (product: typeof products[0]) => {
-    addItem({ id: product.id, name: product.name, desc: product.desc, price: product.price, image: product.image });
+  const handleAdd = (product: typeof visibleProducts[0], idx: number) => {
+    const fallbackImg = FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+    addItem({ id: product.id, name: product.name, desc: product.desc, price: product.price, image: product.imageUrl || fallbackImg });
     setAdded(prev => ({ ...prev, [product.id]: true }));
     setTimeout(() => setAdded(prev => ({ ...prev, [product.id]: false })), 1500);
   };
@@ -69,7 +54,6 @@ export default function Products() {
             </motion.p>
           </div>
 
-          {/* Gift banner */}
           <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
             className="bg-card/60 backdrop-blur-sm border border-primary/20 rounded-2xl p-6 w-full lg:w-72 shrink-0">
             <div className="text-xs text-primary tracking-widest uppercase mb-2">Gift Ideas</div>
@@ -107,79 +91,76 @@ export default function Products() {
         {/* Grid */}
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
-            {filtered.map((product, idx) => (
-              <motion.div
-                layout
-                key={product.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, delay: idx * 0.05 }}
-                className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/40 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_-15px_rgba(201,168,76,0.2)]"
-              >
-                {product.tag && (
-                  <div className={`absolute top-4 left-4 z-10 text-[10px] uppercase tracking-widest px-3 py-1 border rounded-full font-medium bg-background/80 backdrop-blur-sm ${tagColors[product.tag] || 'border-border text-foreground/60'}`}>
-                    {product.tag}
-                  </div>
-                )}
-
-                <div className="aspect-[4/3] w-full overflow-hidden relative bg-[#0d0502]">
-                  <motion.img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    style={{ objectPosition: product.objectPosition }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
-                  {/* Hover glow */}
-                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
-
-                <div className="p-5 relative">
-                  <div className="flex justify-between items-start gap-3 mb-4">
-                    <div>
-                      <h3 className="font-serif text-lg leading-tight group-hover:text-primary transition-colors">{product.name}</h3>
-                      <p className="text-xs text-foreground/40 mt-1">{product.desc}</p>
+            {filtered.map((product, idx) => {
+              const imgSrc = product.imageUrl || FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+              return (
+                <motion.div
+                  layout
+                  key={product.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, delay: idx * 0.05 }}
+                  className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/40 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_-15px_rgba(201,168,76,0.2)]"
+                >
+                  {product.tag && (
+                    <div className={`absolute top-4 left-4 z-10 text-[10px] uppercase tracking-widest px-3 py-1 border rounded-full font-medium bg-background/80 backdrop-blur-sm ${tagColors[product.tag] || 'border-border text-foreground/60'}`}>
+                      {product.tag}
                     </div>
-                    <div className="text-base font-medium text-foreground/90 shrink-0">${product.price.toFixed(2)}</div>
+                  )}
+
+                  <div className="aspect-[4/3] w-full overflow-hidden relative bg-[#0d0502]">
+                    <motion.img
+                      src={imgSrc}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      style={{ objectPosition: product.objectPosition || '50% 50%' }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
 
-                  <motion.button
-                    onClick={() => handleAdd(product)}
-                    whileTap={{ scale: 0.9 }}
-                    className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-medium uppercase tracking-widest transition-all duration-300 border ${
-                      added[product.id]
-                        ? 'bg-green-500/20 border-green-500/40 text-green-400'
-                        : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary hover:text-black'
-                    }`}
-                  >
-                    <AnimatePresence mode="wait">
-                      {added[product.id] ? (
-                        <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                          className="flex items-center gap-1">
-                          <Check className="w-3.5 h-3.5" /> Added to Cart
-                        </motion.span>
-                      ) : (
-                        <motion.span key="add" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                          className="flex items-center gap-1">
-                          <Plus className="w-3.5 h-3.5" /> Add to Cart
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="p-5 relative">
+                    <div className="flex justify-between items-start gap-3 mb-4">
+                      <div>
+                        <h3 className="font-serif text-lg leading-tight group-hover:text-primary transition-colors">{product.name}</h3>
+                        <p className="text-xs text-foreground/40 mt-1">{product.desc}</p>
+                      </div>
+                      <div className="text-base font-medium text-foreground/90 shrink-0">${Number(product.price).toFixed(2)}</div>
+                    </div>
+
+                    <motion.button
+                      onClick={() => handleAdd(product, idx)}
+                      whileTap={{ scale: 0.9 }}
+                      className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-medium uppercase tracking-widest transition-all duration-300 border ${
+                        added[product.id]
+                          ? 'bg-green-500/20 border-green-500/40 text-green-400'
+                          : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary hover:text-black'
+                      }`}
+                    >
+                      <AnimatePresence mode="wait">
+                        {added[product.id] ? (
+                          <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                            className="flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Added to Cart</motion.span>
+                        ) : (
+                          <motion.span key="add" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                            className="flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Add to Cart</motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </motion.div>
 
-        {/* Bottom strip */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 pt-16 border-t border-border/40">
           {[
-            { icon: '✦', title: 'Finest Ingredients', sub: 'We source the world\'s finest cacao.' },
-            { icon: '✦', title: 'Handcrafted Daily', sub: 'Made in small batches by our master chocolatiers.' },
-            { icon: '✦', title: 'Elegant Delivery', sub: 'Premium packaging. Delivered with care.' },
+            { icon: '✦', title: 'Finest Ingredients',  sub: "We source the world's finest cacao." },
+            { icon: '✦', title: 'Handcrafted Daily',    sub: 'Made in small batches by our master chocolatiers.' },
+            { icon: '✦', title: 'Elegant Delivery',     sub: 'Premium packaging. Delivered with care.' },
           ].map(({ icon, title, sub }) => (
             <div key={title} className="flex items-start gap-4">
               <span className="text-primary text-sm mt-1">{icon}</span>

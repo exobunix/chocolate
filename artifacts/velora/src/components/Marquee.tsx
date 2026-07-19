@@ -1,19 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 
 export default function Marquee() {
-  const words = [
-    "Handcrafted",
-    "Single Origin",
-    "Velvet Truffles",
-    "Gold Collection",
-    "Dark 70%",
-    "Hazelnut Praline",
-    "Small Batch",
-    "Artisan Made"
-  ];
-
-  // Repeat the array a few times to ensure smooth infinite scrolling
+  const { config } = useSiteConfig();
+  const words = config.marquee.words;
   const items = [...words, ...words, ...words, ...words];
 
   return (
@@ -22,11 +13,7 @@ export default function Marquee() {
         <motion.div
           className="flex items-center space-x-12 px-6"
           animate={{ x: [0, -1000] }}
-          transition={{
-            repeat: Infinity,
-            ease: "linear",
-            duration: 20
-          }}
+          transition={{ repeat: Infinity, ease: 'linear', duration: 20 }}
         >
           {items.map((word, idx) => (
             <div key={idx} className="flex items-center space-x-12">

@@ -4,14 +4,7 @@ import { Search, User, ShoppingCart, Menu, X, LogOut, ChevronDown } from 'lucide
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-
-const navLinks = [
-  { label: 'Shop', href: '/shop', section: 'shop' },
-  { label: 'Collections', href: '/collections' },
-  { label: 'Gifts', href: '/gifts', section: 'gifts' },
-  { label: 'Story', href: '/story', section: 'story' },
-  { label: 'Contact', href: '/contact' },
-];
+import { useSiteConfig } from '@/context/SiteConfigContext';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -19,7 +12,10 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { count, openCart } = useCart();
   const { user, openAuth, logout } = useAuth();
+  const { config } = useSiteConfig();
   const [location] = useLocation();
+
+  const navLinks = config.nav.links;
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50);
@@ -27,7 +23,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close user menu on outside click
   useEffect(() => {
     if (!userMenuOpen) return;
     const handler = () => setUserMenuOpen(false);
@@ -35,11 +30,11 @@ export default function Navbar() {
     return () => document.removeEventListener('click', handler);
   }, [userMenuOpen]);
 
-  const handleNavClick = (link: typeof navLinks[0]) => {
+  const handleNavClick = (link: { label: string; href: string }) => {
     setIsMobileOpen(false);
-    if (link.section && location === '/') {
-      const el = document.getElementById(link.section);
-      el?.scrollIntoView({ behavior: 'smooth' });
+    if (link.href.startsWith('#') && location === '/') {
+      const id = link.href.slice(1);
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -55,13 +50,11 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        {/* Logo */}
         <Link href="/" className="z-50 flex flex-col leading-none">
-          <span className="text-2xl font-serif tracking-[0.25em] text-[#c9a84c]">VELORA</span>
-          <span className="text-[9px] tracking-[0.3em] text-[#c9a84c]/50 uppercase">The Art of Chocolate</span>
+          <span className="text-2xl font-serif tracking-[0.25em] text-[#c9a84c]">{config.site.logoText}</span>
+          <span className="text-[9px] tracking-[0.3em] text-[#c9a84c]/50 uppercase">{config.site.tagline}</span>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map(link => (
             <Link
@@ -80,13 +73,11 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Icons */}
         <div className="hidden md:flex items-center gap-5 z-50">
           <button className="text-white/60 hover:text-[#c9a84c] transition-colors p-1">
-            <Search className="w-4.5 h-4.5" style={{ width: 18, height: 18 }} />
+            <Search style={{ width: 18, height: 18 }} />
           </button>
 
-          {/* User button */}
           <div className="relative">
             <button
               onClick={() => user ? setUserMenuOpen(o => !o) : openAuth('login')}
@@ -131,11 +122,7 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
-          {/* Cart button */}
-          <button
-            onClick={openCart}
-            className="relative text-white/60 hover:text-[#c9a84c] transition-colors p-1"
-          >
+          <button onClick={openCart} className="relative text-white/60 hover:text-[#c9a84c] transition-colors p-1">
             <ShoppingCart style={{ width: 18, height: 18 }} />
             <AnimatePresence>
               {count > 0 && (
@@ -153,7 +140,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile menu toggle */}
         <div className="md:hidden flex items-center gap-3 z-50">
           <button onClick={openCart} className="relative text-white/70 hover:text-[#c9a84c] transition-colors">
             <ShoppingCart className="w-5 h-5" />
@@ -167,7 +153,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div

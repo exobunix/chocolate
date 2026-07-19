@@ -30,6 +30,7 @@ function ChocolateMeltBar() {
       const t = setTimeout(() => setMeltStage(1), 3000);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [meltStage]);
 
   const cellVariants = (idx: number) => {

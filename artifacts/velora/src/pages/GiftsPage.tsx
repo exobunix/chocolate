@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Plus, Check, Gift, Truck, Star } from 'lucide-react';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { useSiteConfig } from '@/context/SiteConfigContext';
+import type { Product } from '@/context/SiteConfigContext';
 import collectionsImg from '@assets/Image-455_1784381276324.jpg';
 import heroImg from '@assets/Image-396_1784381276324.jpg';
+import processImg from '@assets/Image-970_1784381276323.jpg';
 
-const giftItems = [
-  { id: 201, name: 'Gold Collection Gift Box', desc: '12-Piece Assorted Chocolates', price: 64.00, badge: 'Most Popular', image: collectionsImg },
-  { id: 202, name: 'Noir Gift Box', desc: '24 Pieces — Dark & Hazelnut', price: 68.00, badge: 'Limited', image: collectionsImg },
-  { id: 203, name: 'Discovery Set', desc: '6 Signature Flavors', price: 38.00, badge: '', image: heroImg },
-  { id: 204, name: 'The Velora Hamper', desc: 'Bar + Truffles + Bonbons', price: 96.00, badge: 'Gift of the Year', image: collectionsImg },
-];
+const FALLBACK_IMAGES = [collectionsImg, heroImg, processImg, collectionsImg];
 
-function GiftCard({ item }: { item: typeof giftItems[0] }) {
+function GiftCard({ product, fallbackImg }: { product: Product; fallbackImg: string }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
+  const imgSrc = product.imageUrl || fallbackImg;
+
   const handleAdd = () => {
-    addItem({ id: item.id, name: item.name, desc: item.desc, price: item.price, image: item.image });
+    addItem({ id: product.id, name: product.name, desc: product.desc, price: product.price, image: imgSrc });
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -29,11 +30,11 @@ function GiftCard({ item }: { item: typeof giftItems[0] }) {
       className="bg-card border border-border hover:border-primary/40 rounded-2xl overflow-hidden group transition-all duration-500 hover:shadow-[0_20px_50px_-15px_rgba(201,168,76,0.2)]"
     >
       <div className="aspect-[4/3] overflow-hidden relative bg-[#0d0502]">
-        <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+        <img src={imgSrc} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
         <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent opacity-70" />
-        {item.badge && (
+        {product.tag && (
           <div className="absolute top-4 left-4 bg-primary text-black text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-            {item.badge}
+            {product.tag}
           </div>
         )}
         <div className="absolute bottom-4 right-4">
@@ -41,10 +42,10 @@ function GiftCard({ item }: { item: typeof giftItems[0] }) {
         </div>
       </div>
       <div className="p-6">
-        <h3 className="font-serif text-lg mb-1 group-hover:text-primary transition-colors">{item.name}</h3>
-        <p className="text-xs text-foreground/40 mb-4">{item.desc}</p>
+        <h3 className="font-serif text-lg mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
+        <p className="text-xs text-foreground/40 mb-4">{product.desc}</p>
         <div className="flex items-center justify-between">
-          <span className="text-xl font-serif text-primary">${item.price.toFixed(2)}</span>
+          <span className="text-xl font-serif text-primary">${product.price.toFixed(2)}</span>
           <motion.button onClick={handleAdd} whileTap={{ scale: 0.93 }}
             className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full text-xs font-medium uppercase tracking-widest transition-all border ${
               added ? 'bg-green-500/20 border-green-500/40 text-green-400' : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary hover:text-black'
@@ -58,6 +59,9 @@ function GiftCard({ item }: { item: typeof giftItems[0] }) {
 }
 
 export default function GiftsPage() {
+  const { config } = useSiteConfig();
+  const giftProducts = config.products.filter(p => p.category === 'Gifts' && p.visible);
+
   return (
     <div className="min-h-screen bg-background text-foreground pt-20">
       {/* Hero */}
@@ -97,9 +101,19 @@ export default function GiftsPage() {
           className="text-3xl font-serif mb-12">
           Curated Gift <span className="italic text-primary">Selections</span>
         </motion.h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {giftItems.map(item => <GiftCard key={item.id} item={item} />)}
-        </div>
+
+        {giftProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {giftProducts.map((product, i) => (
+              <GiftCard key={product.id} product={product} fallbackImg={FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-24 text-center text-foreground/30 border border-border/20 rounded-2xl">
+            <Gift className="w-10 h-10 mx-auto mb-4 text-primary/20" />
+            <p className="text-sm">No gift products available right now.</p>
+          </div>
+        )}
 
         {/* Custom box CTA */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
