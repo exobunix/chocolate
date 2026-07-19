@@ -2,8 +2,35 @@ import { Router } from "express";
 import crypto from "crypto";
 import { SiteConfigModel, MediaItemModel, OrderModel } from "../lib/db";
 import { logger } from "../lib/logger";
+import mongoose from "mongoose";
 
 const router = Router();
+
+// GET /api/db-test
+router.get("/db-test", async (req, res) => {
+  try {
+    const readyState = mongoose.connection.readyState;
+    const states = ["disconnected", "connected", "connecting", "disconnecting"];
+    
+    let queryError = null;
+    let queryResult = null;
+    try {
+      queryResult = await SiteConfigModel.findOne({ key: "default" }).maxTimeMS(5000);
+    } catch (err: any) {
+      queryError = err.message || err;
+    }
+
+    res.json({
+      connectionState: states[readyState],
+      mongodbUriSet: !!process.env.MONGODB_URI,
+      mongodbUriMasked: process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/:([^@]+)@/, ":****@") : null,
+      queryResult: !!queryResult,
+      queryError
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || err });
+  }
+});
 
 // GET /api/config
 router.get("/config", async (req, res) => {
