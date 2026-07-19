@@ -1,48 +1,106 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Trash2, Copy, Check, Image as ImageIcon, Link as LinkIcon, Plus } from 'lucide-react';
+import ImageKit from 'imagekit-javascript';
 
-const STORAGE_KEY = 'velora_media_library';
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
-interface MediaItem { id: string; name: string; url: string; type: 'url' | 'upload'; size?: string; }
+const imagekit = new ImageKit({
+  publicKey: 'public_5z+lOJYXBs7KgjxXI/ikiRBuaiA=',
+  urlEndpoint: 'https://ik.imagekit.io/smcdngw8m',
+});
 
-function getMedia(): MediaItem[] {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
-}
-function saveMedia(items: MediaItem[]) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+interface MediaItem { id: string; name: string; url: string; type: 'url' | 'upload'; size?: string; fileId?: string; }
 
 export default function MediaAdmin() {
-  const [items, setItems] = useState<MediaItem[]>(getMedia);
+  const [items, setItems] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [urlInput, setUrlInput] = useState('');
   const [urlName, setUrlName] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const addUrl = () => {
+  // Load items from API
+  useEffect(() => {
+    fetch(`${API_BASE}/api/media`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        setItems(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch media:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const addUrl = async () => {
     if (!urlInput.trim()) return;
-    const item: MediaItem = { id: Date.now().toString(), name: urlName || urlInput.split('/').pop() || 'image', url: urlInput, type: 'url' };
-    const next = [...items, item];
-    setItems(next);
-    saveMedia(next);
-    setUrlInput('');
-    setUrlName('');
+    try {
+      const res = await fetch(`${API_BASE}/api/media`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: urlName || urlInput.split('/').pop() || 'image',
+          url: urlInput,
+          type: 'url'
+        })
+      });
+      if (res.ok) {
+        const newItem = await res.json();
+        setItems(prev => [newItem, ...prev]);
+        setUrlInput('');
+        setUrlName('');
+      }
+    } catch (err) {
+      console.error('Failed to add url image:', err);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const url = ev.target?.result as string;
-        const size = (file.size / 1024).toFixed(1) + ' KB';
-        const item: MediaItem = { id: Date.now().toString() + Math.random(), name: file.name, url, type: 'upload', size };
-        setItems(prev => {
-          const next = [...prev, item];
-          saveMedia(next);
-          return next;
+    files.forEach(async file => {
+      try {
+        const sigRes = await fetch(`${API_BASE}/api/media/signature`);
+        if (!sigRes.ok) throw new Error('Failed to fetch upload signature');
+        const sigData = await sigRes.json();
+
+        imagekit.upload({
+          file: file,
+          fileName: file.name,
+          folder: '/choclate',
+          signature: sigData.signature,
+          token: sigData.token,
+          expire: sigData.expire,
+        }, async (err: any, result: any) => {
+          if (err) {
+            console.error('Upload failed:', err);
+            return;
+          }
+
+          try {
+            const res = await fetch(`${API_BASE}/api/media`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: file.name,
+                url: result?.url,
+                type: 'upload',
+                size: (file.size / 1024).toFixed(1) + ' KB',
+                fileId: result?.fileId,
+              })
+            });
+            if (res.ok) {
+              const newItem = await res.json();
+              setItems(prev => [newItem, ...prev]);
+            }
+          } catch (dbErr) {
+            console.error('Failed to save uploaded image metadata:', dbErr);
+          }
         });
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Failed to prepare upload:', err);
+      }
     });
     e.target.value = '';
   };
@@ -53,10 +111,17 @@ export default function MediaAdmin() {
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const remove = (id: string) => {
-    const next = items.filter(i => i.id !== id);
-    setItems(next);
-    saveMedia(next);
+  const remove = async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/media/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setItems(prev => prev.filter(i => i.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to delete media item:', err);
+    }
     setDeleteId(null);
   };
 

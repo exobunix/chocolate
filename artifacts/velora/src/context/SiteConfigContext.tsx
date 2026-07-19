@@ -200,6 +200,7 @@ const DEFAULT_CONFIG: SiteConfig = {
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'velora_site_config';
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
 function loadConfig(): SiteConfig {
   try {
@@ -228,6 +229,7 @@ interface SiteConfigContextValue {
   config: SiteConfig;
   updateConfig: (patch: DeepPartial<SiteConfig>) => void;
   resetConfig: () => void;
+  loading: boolean;
 }
 
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
@@ -235,12 +237,48 @@ type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]>
 const SiteConfigContext = createContext<SiteConfigContextValue | null>(null);
 
 export function SiteConfigProvider({ children }: { children: React.ReactNode }) {
-  const [config, setConfig] = useState<SiteConfig>(loadConfig);
+  const [config, setConfig] = useState<SiteConfig>(DEFAULT_CONFIG);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetch(`${API_BASE}/api/config`)
+      .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(data => {
+        if (data && Object.keys(data).length > 0) {
+          setConfig(prev => deepMerge(prev, data));
+        } else {
+          // If server is empty, populate it with local or default config
+          const local = loadConfig();
+          setConfig(local);
+          fetch(`${API_BASE}/api/config`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ config: local })
+          }).catch(err => console.error('Failed to initialize server config:', err));
+        }
+      })
+      .catch(() => {
+        // Fallback to local storage on error
+        setConfig(loadConfig());
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const updateConfig = useCallback((patch: DeepPartial<SiteConfig>) => {
     setConfig(prev => {
       const next = deepMerge(prev, patch as Partial<SiteConfig>);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
+      // Push to backend
+      fetch(`${API_BASE}/api/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config: next })
+      }).catch(err => console.error('Failed to save config to server:', err));
+
       return next;
     });
   }, []);
@@ -248,10 +286,15 @@ export function SiteConfigProvider({ children }: { children: React.ReactNode }) 
   const resetConfig = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setConfig(DEFAULT_CONFIG);
+    fetch(`${API_BASE}/api/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config: DEFAULT_CONFIG })
+    }).catch(err => console.error('Failed to reset config on server:', err));
   }, []);
 
   return (
-    <SiteConfigContext.Provider value={{ config, updateConfig, resetConfig }}>
+    <SiteConfigContext.Provider value={{ config, updateConfig, resetConfig, loading }}>
       {children}
     </SiteConfigContext.Provider>
   );
