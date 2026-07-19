@@ -62,7 +62,7 @@ function ProductCard({ product, fallbackImg }: { product: Product; fallbackImg: 
         <p className="text-xs text-foreground/40 mt-0.5">{product.desc}</p>
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-primary">${product.price.toFixed(2)}</span>
+        <span className="text-sm font-medium text-primary">₹{product.price.toFixed(2)}</span>
         <motion.button
           onClick={handleAdd}
           whileTap={{ scale: 0.9 }}

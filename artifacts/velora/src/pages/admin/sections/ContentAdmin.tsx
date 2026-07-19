@@ -154,7 +154,7 @@ export default function ContentAdmin() {
               <FieldRow label="Description">
                 <input className="admin-input" value={gifts.featured.desc} onChange={e => setGifts(g => ({ ...g, featured: { ...g.featured, desc: e.target.value } }))} />
               </FieldRow>
-              <FieldRow label="Price ($)">
+              <FieldRow label="Price (₹)">
                 <input type="number" min="0" step="0.01" className="admin-input" value={gifts.featured.price}
                   onChange={e => setGifts(g => ({ ...g, featured: { ...g.featured, price: parseFloat(e.target.value) || 0 } }))} />
               </FieldRow>

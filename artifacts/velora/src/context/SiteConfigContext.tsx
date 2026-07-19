@@ -148,7 +148,7 @@ const DEFAULT_CONFIG: SiteConfig = {
     headline: 'Give The Gift',
     headlineItalic: 'of Velora.',
     subheadline: 'Beautifully packaged in our signature noir boxes, finished with a golden ribbon and a personalized handwritten note.',
-    featured: { name: 'The Gold Collection Gift Box', desc: '12-Piece Assorted Chocolates', price: 64.00 },
+    featured: { name: 'The Gold Collection Gift Box', desc: '12-Piece Assorted Chocolates', price: 1299.00 },
     features: [
       { iconName: 'truck',   title: 'Same-Day Delivery',  desc: 'Available for selected cities when ordered before 2 PM. Fresh to your door.' },
       { iconName: 'gift',    title: 'Send As A Gift',     desc: 'Add a custom message and hide the price. We handle the rest.' },
@@ -161,15 +161,15 @@ const DEFAULT_CONFIG: SiteConfig = {
     gifts:    '',
   },
   products: [
-    { id: 1,  name: 'Hazelnut Praline Box',      desc: '12 Pieces',           price: 42, category: 'Pralines', tag: 'Bestseller', imageUrl: '', objectPosition: '10% 60%', visible: true },
-    { id: 2,  name: 'Velvet Truffles',            desc: '16 Pieces',           price: 36, category: 'Truffles', tag: 'Bestseller', imageUrl: '', objectPosition: '50% 60%', visible: true },
-    { id: 3,  name: 'Salted Caramel Squares',     desc: '12 Pieces',           price: 38, category: 'Bars',     tag: 'New',        imageUrl: '', objectPosition: '85% 60%', visible: true },
-    { id: 4,  name: 'Noir Gift Box',              desc: '24 Pieces',           price: 68, category: 'Gifts',    tag: 'Limited',    imageUrl: '', objectPosition: '10% 85%', visible: true },
-    { id: 5,  name: 'Cocoa Bonbons',              desc: '12 Pieces',           price: 34, category: 'Truffles', tag: '',           imageUrl: '', objectPosition: '50% 85%', visible: true },
-    { id: 6,  name: 'Signature Dark Bar',         desc: '70% Single Origin',   price: 14, category: 'Bars',     tag: 'Signature',  imageUrl: '', objectPosition: '60% 40%', visible: true },
-    { id: 7,  name: 'Gold Collection Gift Box',   desc: '12-Piece Assorted',   price: 64, category: 'Gifts',    tag: 'Bestseller', imageUrl: '', objectPosition: '80% 70%', visible: true },
-    { id: 8,  name: 'Dark Chocolate Truffles',    desc: '8 Pieces',            price: 32, category: 'Truffles', tag: '',           imageUrl: '', objectPosition: '50% 90%', visible: true },
-    { id: 9,  name: 'Single Origin 70%',          desc: 'Full Bar',            price: 28, category: 'Bars',     tag: 'New',        imageUrl: '', objectPosition: '50% 50%', visible: true },
+    { id: 1,  name: 'Hazelnut Praline Box',      desc: '12 Pieces',           price: 1299, category: 'Pralines', tag: 'Bestseller', imageUrl: '', objectPosition: '10% 60%', visible: true },
+    { id: 2,  name: 'Velvet Truffles',            desc: '16 Pieces',           price: 999, category: 'Truffles', tag: 'Bestseller', imageUrl: '', objectPosition: '50% 60%', visible: true },
+    { id: 3,  name: 'Salted Caramel Squares',     desc: '12 Pieces',           price: 1099, category: 'Bars',     tag: 'New',        imageUrl: '', objectPosition: '85% 60%', visible: true },
+    { id: 4,  name: 'Noir Gift Box',              desc: '24 Pieces',           price: 1999, category: 'Gifts',    tag: 'Limited',    imageUrl: '', objectPosition: '10% 85%', visible: true },
+    { id: 5,  name: 'Cocoa Bonbons',              desc: '12 Pieces',           price: 949, category: 'Truffles', tag: '',           imageUrl: '', objectPosition: '50% 85%', visible: true },
+    { id: 6,  name: 'Signature Dark Bar',         desc: '70% Single Origin',   price: 399, category: 'Bars',     tag: 'Signature',  imageUrl: '', objectPosition: '60% 40%', visible: true },
+    { id: 7,  name: 'Gold Collection Gift Box',   desc: '12-Piece Assorted',   price: 1799, category: 'Gifts',    tag: 'Bestseller', imageUrl: '', objectPosition: '80% 70%', visible: true },
+    { id: 8,  name: 'Dark Chocolate Truffles',    desc: '8 Pieces',            price: 899, category: 'Truffles', tag: '',           imageUrl: '', objectPosition: '50% 90%', visible: true },
+    { id: 9,  name: 'Single Origin 70%',          desc: 'Full Bar',            price: 799, category: 'Bars',     tag: 'New',        imageUrl: '', objectPosition: '50% 50%', visible: true },
   ],
   testimonials: [
     { quote: "The website feels as premium as the chocolate. Smooth, elegant and easy to shop. The hazelnut pralines are simply divine.", author: 'Sophia M.', role: 'Verified Buyer' },
@@ -194,7 +194,7 @@ const DEFAULT_CONFIG: SiteConfig = {
     ingredients:   { title: 'Ingredients',    content: 'We use only the finest single-origin cacao, ethically sourced from partner farms.' },
     sustainability:{ title: 'Sustainability', content: 'Our commitment to the planet is as strong as our commitment to flavor.' },
     faq:           { title: 'FAQ',            content: 'Have a question? We\'ve got answers. Contact us at hello@velora.com' },
-    shipping:      { title: 'Shipping & Returns', content: 'Free shipping on orders over $50. Returns accepted within 14 days.' },
+    shipping:      { title: 'Shipping & Returns', content: 'Free shipping on orders over ₹999. Returns accepted within 14 days.' },
   },
 };
 

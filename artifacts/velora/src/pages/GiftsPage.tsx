@@ -45,7 +45,7 @@ function GiftCard({ product, fallbackImg }: { product: Product; fallbackImg: str
         <h3 className="font-serif text-lg mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
         <p className="text-xs text-foreground/40 mb-4">{product.desc}</p>
         <div className="flex items-center justify-between">
-          <span className="text-xl font-serif text-primary">${product.price.toFixed(2)}</span>
+          <span className="text-xl font-serif text-primary">₹{product.price.toFixed(2)}</span>
           <motion.button onClick={handleAdd} whileTap={{ scale: 0.93 }}
             className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full text-xs font-medium uppercase tracking-widest transition-all border ${
               added ? 'bg-green-500/20 border-green-500/40 text-green-400' : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary hover:text-black'

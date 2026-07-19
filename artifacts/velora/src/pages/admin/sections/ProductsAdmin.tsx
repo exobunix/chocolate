@@ -52,7 +52,7 @@ function ProductForm({ initial, onSave, onCancel }: {
             className="admin-input" placeholder="e.g. 12 Pieces" />
         </div>
         <div>
-          <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Price ($) *</label>
+          <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5 font-medium">Price (₹) *</label>
           <input required type="number" min="0" step="0.01" value={form.price} onChange={e => set('price', parseFloat(e.target.value) || 0)}
             className="admin-input" />
         </div>
@@ -184,7 +184,7 @@ export default function ProductsAdmin() {
                 <p className="text-xs text-white/30 truncate">{product.desc}</p>
                 {product.tag && <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full border border-[#c9a84c]/30 text-[#c9a84c]">{product.tag}</span>}
               </div>
-              <span className="text-sm text-[#c9a84c] font-medium whitespace-nowrap">${Number(product.price).toFixed(2)}</span>
+              <span className="text-sm text-[#c9a84c] font-medium whitespace-nowrap">₹{Number(product.price).toFixed(2)}</span>
               <span className="text-xs text-white/50 whitespace-nowrap">{product.category}</span>
               <button onClick={() => toggleVisible(product.id)}
                 className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${product.visible ? 'bg-[#c9a84c]' : 'bg-white/10'}`}>

@@ -41,7 +41,7 @@ export default function Dashboard({ setSection }: { setSection: (s: string) => v
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Package}     label="Total Products" value={products.length}  sub={`${visibleProducts} visible`}                color="bg-[#c9a84c]/10 text-[#c9a84c]" />
         <StatCard icon={Users}       label="Registered Users" value={users.length}   sub="All time signups"                             color="bg-blue-500/10 text-blue-400" />
-        <StatCard icon={ShoppingBag} label="Catalog Value"  value={`$${totalValue}`} sub="Sum of all product prices"                    color="bg-green-500/10 text-green-400" />
+        <StatCard icon={ShoppingBag} label="Catalog Value"  value={`₹${totalValue}`} sub="Sum of all product prices"                    color="bg-green-500/10 text-green-400" />
         <StatCard icon={TrendingUp}  label="Categories"     value={new Set(products.map(p => p.category)).size} sub="Distinct categories" color="bg-purple-500/10 text-purple-400" />
       </div>
 
@@ -76,7 +76,7 @@ export default function Dashboard({ setSection }: { setSection: (s: string) => v
                   <span className="text-xs text-white/30 ml-2">{p.category}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-[#c9a84c] font-medium">${p.price}</span>
+                  <span className="text-xs text-[#c9a84c] font-medium">₹{p.price}</span>
                   {p.visible
                     ? <Eye className="w-3.5 h-3.5 text-green-400" />
                     : <EyeOff className="w-3.5 h-3.5 text-white/20" />

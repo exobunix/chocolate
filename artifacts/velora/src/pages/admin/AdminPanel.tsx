@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, FileText, Navigation, Layout,
   Users, BookOpen, Settings, Image, Lock, Eye, EyeOff,
-  LogOut, ChevronRight, ExternalLink, Menu, X,
+  LogOut, ChevronRight, ExternalLink, Menu, X, ShoppingBag,
 } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { Link } from 'wouter';
@@ -17,10 +17,12 @@ import UsersAdmin     from './sections/UsersAdmin';
 import PagesAdmin     from './sections/PagesAdmin';
 import SettingsAdmin  from './sections/SettingsAdmin';
 import MediaAdmin     from './sections/MediaAdmin';
+import OrdersAdmin    from './sections/OrdersAdmin';
 
 // ─── Section registry ─────────────────────────────────────────────────────────
 const SECTIONS = [
   { id: 'dashboard',   label: 'Dashboard',   icon: LayoutDashboard, group: 'main' },
+  { id: 'orders',      label: 'Orders',      icon: ShoppingBag,     group: 'main' },
   { id: 'products',    label: 'Products',     icon: Package,         group: 'content' },
   { id: 'content',     label: 'Content',      icon: FileText,        group: 'content' },
   { id: 'navigation',  label: 'Navigation',   icon: Navigation,      group: 'content' },
@@ -258,6 +260,7 @@ function SectionContent({ section, setSection }: { section: string; setSection: 
     case 'pages':      return <PagesAdmin />;
     case 'settings':   return <SettingsAdmin />;
     case 'media':      return <MediaAdmin />;
+    case 'orders':     return <OrdersAdmin />;
     default:           return <Dashboard setSection={setSection} />;
   }
 }

@@ -126,7 +126,7 @@ export default function Products() {
                         <h3 className="font-serif text-lg leading-tight group-hover:text-primary transition-colors">{product.name}</h3>
                         <p className="text-xs text-foreground/40 mt-1">{product.desc}</p>
                       </div>
-                      <div className="text-base font-medium text-foreground/90 shrink-0">${Number(product.price).toFixed(2)}</div>
+                      <div className="text-base font-medium text-foreground/90 shrink-0">₹{Number(product.price).toFixed(2)}</div>
                     </div>
 
                     <motion.button
