@@ -120,7 +120,9 @@ router.delete("/media/:id", async (req, res) => {
 // GET /api/orders
 router.get("/orders", async (req, res) => {
   try {
-    const orders = await OrderModel.find().sort({ createdAt: -1 });
+    const { email } = req.query;
+    const filter = email ? { customerEmail: String(email).toLowerCase().trim() } : {};
+    const orders = await OrderModel.find(filter).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     logger.error({ err }, "Error in GET /orders");
@@ -138,7 +140,7 @@ router.post("/orders", async (req, res) => {
     }
     const order = new OrderModel({
       customerName,
-      customerEmail,
+      customerEmail: customerEmail.toLowerCase().trim(),
       customerPhone,
       shippingAddress,
       items,

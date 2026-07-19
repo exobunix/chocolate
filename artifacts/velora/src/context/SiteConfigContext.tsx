@@ -105,6 +105,7 @@ const DEFAULT_CONFIG: SiteConfig = {
       { label: 'Gifts',       href: '/gifts' },
       { label: 'Story',       href: '/story' },
       { label: 'Contact',     href: '/contact' },
+      { label: 'My Orders',   href: '/profile' },
     ],
   },
   footer: {

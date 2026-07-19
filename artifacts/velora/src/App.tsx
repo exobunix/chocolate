@@ -25,6 +25,7 @@ import GiftsPage       from '@/pages/GiftsPage';
 import ContactPage     from '@/pages/Contact';
 import AdminPanel      from '@/pages/admin/AdminPanel';
 import NotFound        from '@/pages/not-found';
+import ProfilePage     from '@/pages/ProfilePage';
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ function StoreFront() {
         <Route path="/story"       component={StoryPage} />
         <Route path="/gifts"       component={GiftsPage} />
         <Route path="/contact"     component={ContactPage} />
+        <Route path="/profile"     component={ProfilePage} />
         <Route component={NotFound} />
       </Switch>
       <CartDrawer />

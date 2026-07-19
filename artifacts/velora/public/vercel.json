@@ -1,11 +1,13 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/api/:path*", "destination": "https://chocolate-dj55.onrender.com/api/:path*" },
+    { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/shop", "destination": "/index.html" },
     { "source": "/collections", "destination": "/index.html" },
     { "source": "/story", "destination": "/index.html" },
     { "source": "/gifts", "destination": "/index.html" },
-    { "source": "/contact", "destination": "/index.html" }
+    { "source": "/contact", "destination": "/index.html" },
+    { "source": "/profile", "destination": "/index.html" }
   ]
 }
