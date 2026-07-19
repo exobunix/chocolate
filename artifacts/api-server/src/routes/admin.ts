@@ -24,6 +24,8 @@ router.get("/db-test", async (req, res) => {
       connectionState: states[readyState],
       mongodbUriSet: !!process.env.MONGODB_URI,
       mongodbUriMasked: process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/:([^@]+)@/, ":****@") : null,
+      hasPlaceholderUsername: (process.env.MONGODB_URI || "").includes("<db_username>"),
+      hasPlaceholderPassword: (process.env.MONGODB_URI || "").includes("<db_password>"),
       queryResult: !!queryResult,
       queryError
     });
