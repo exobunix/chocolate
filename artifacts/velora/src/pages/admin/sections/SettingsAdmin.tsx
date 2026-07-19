@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Save, Eye, EyeOff, RefreshCcw, AlertTriangle } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
+import ImagePicker from '../ImagePicker';
 
 function SaveBar({ onSave, saved }: { onSave: () => void; saved: boolean }) {
   return (
@@ -22,8 +23,8 @@ export default function SettingsAdmin() {
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [resetConfirm, setResetConfirm] = useState(false);
 
-  const save = (key: string, data: any) => {
-    updateConfig(data);
+  const save = (key: string, data: unknown) => {
+    updateConfig(data as any);
     setSaved(s => ({ ...s, [key]: true }));
     setTimeout(() => setSaved(s => ({ ...s, [key]: false })), 2000);
   };
@@ -45,10 +46,20 @@ export default function SettingsAdmin() {
         <p className="text-white/40 text-sm">Configure site identity, branding, and admin credentials.</p>
       </div>
 
-      {/* Brand Identity */}
+      {/* ── Brand Identity ──────────────────────────────────── */}
       <div className="bg-[#110703] border border-white/5 rounded-2xl p-6">
         <h3 className="font-semibold mb-5">Brand Identity</h3>
         <div className="space-y-4">
+
+          {/* Logo Image */}
+          <ImagePicker
+            label="Logo Image (optional — replaces text when set)"
+            value={site.logoImageUrl}
+            onChange={url => setSite(s => ({ ...s, logoImageUrl: url }))}
+            placeholder="Paste logo image URL or pick from library…"
+            previewClass="mt-2 h-14 w-auto max-w-[180px] object-contain rounded-lg border border-white/10 bg-black/30 p-2"
+          />
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Logo Text</label>
@@ -75,19 +86,25 @@ export default function SettingsAdmin() {
           </div>
         </div>
 
-        {/* Live preview */}
+        {/* Live logo preview */}
         <div className="mt-5 p-4 bg-black/40 rounded-xl border border-white/5">
           <p className="text-xs text-white/30 uppercase tracking-widest mb-3">Logo Preview</p>
-          <div className="flex flex-col leading-none w-fit">
-            <span className="text-2xl font-serif tracking-[0.25em] text-[#c9a84c]">{site.logoText || 'VELORA'}</span>
-            <span className="text-[9px] tracking-[0.3em] text-[#c9a84c]/50 uppercase">{site.tagline || 'The Art of Chocolate'}</span>
+          <div className="flex items-center gap-3">
+            {site.logoImageUrl && (
+              <img src={site.logoImageUrl} alt="logo" className="h-9 w-auto object-contain"
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+            )}
+            <div className="flex flex-col leading-none">
+              <span className="text-2xl font-serif tracking-[0.25em] text-[#c9a84c]">{site.logoText || 'VELORA'}</span>
+              <span className="text-[9px] tracking-[0.3em] text-[#c9a84c]/50 uppercase">{site.tagline || 'The Art of Chocolate'}</span>
+            </div>
           </div>
         </div>
 
         <SaveBar onSave={handleSaveSite} saved={!!saved.site} />
       </div>
 
-      {/* Admin Password */}
+      {/* ── Admin Password ──────────────────────────────────── */}
       <div className="bg-[#110703] border border-white/5 rounded-2xl p-6">
         <h3 className="font-semibold mb-5">Admin Password</h3>
         <div className="space-y-4">
@@ -122,14 +139,15 @@ export default function SettingsAdmin() {
         </div>
       </div>
 
-      {/* Danger zone */}
+      {/* ── Danger zone ─────────────────────────────────────── */}
       <div className="bg-[#110703] border border-red-500/15 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="w-4 h-4 text-red-400" />
           <h3 className="font-semibold text-red-400">Danger Zone</h3>
         </div>
         <p className="text-sm text-white/50 mb-4">
-          Reset all site configuration to factory defaults. This will erase all content changes, product edits, navigation changes, and all other settings. <strong className="text-white">This cannot be undone.</strong>
+          Reset all site configuration to factory defaults. This will erase all content, product edits, navigation changes, and all other settings.{' '}
+          <strong className="text-white">This cannot be undone.</strong>
         </p>
         {!resetConfirm ? (
           <button onClick={() => setResetConfirm(true)}

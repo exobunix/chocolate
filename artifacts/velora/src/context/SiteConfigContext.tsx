@@ -19,10 +19,12 @@ export interface Product {
 
 export interface Testimonial { quote: string; author: string; role: string; }
 export interface ProcessStep { num: string; title: string; desc: string; }
+export interface GiftFeature  { iconName: string; title: string; desc: string; }
 
 export interface SiteConfig {
   site: {
     logoText: string;
+    logoImageUrl: string;       // ← logo image (replaces text when set)
     tagline: string;
     name: string;
     description: string;
@@ -36,6 +38,7 @@ export interface SiteConfig {
     subheadline: string;
     ctaText: string;
     statsText: string;
+    backgroundImageUrl: string; // ← hero background image
   };
   marquee: { words: string[] };
   nav: { links: NavLink[] };
@@ -46,6 +49,19 @@ export interface SiteConfig {
     columns: FooterColumn[];
     copyright: string;
     bottomLinks: string[];
+  };
+  gifts: {                      // ← home-page Gifts section (was hardcoded)
+    badge: string;
+    headline: string;
+    headlineItalic: string;
+    subheadline: string;
+    featured: { name: string; desc: string; price: number };
+    features: GiftFeature[];
+  };
+  collectionsImages: {           // ← per-tab images for Collections page
+    dark: string;
+    pralines: string;
+    gifts: string;
   };
   products: Product[];
   testimonials: Testimonial[];
@@ -63,6 +79,7 @@ export interface SiteConfig {
 const DEFAULT_CONFIG: SiteConfig = {
   site: {
     logoText: 'VELORA',
+    logoImageUrl: '',
     tagline: 'The Art of Chocolate',
     name: 'Velora',
     description: 'Artisanal chocolate crafted in small batches for unmatched richness. Made to melt your heart.',
@@ -76,6 +93,7 @@ const DEFAULT_CONFIG: SiteConfig = {
     subheadline: 'Velora chocolates are handcrafted with the world\'s finest cacao, crafted in small batches for unmatched richness.',
     ctaText: 'Explore Collection',
     statsText: 'Loved by 10k+',
+    backgroundImageUrl: '',
   },
   marquee: {
     words: ['Handcrafted', 'Single Origin', 'Velvet Truffles', 'Gold Collection', 'Dark 70%', 'Hazelnut Praline', 'Small Batch', 'Artisan Made'],
@@ -125,6 +143,23 @@ const DEFAULT_CONFIG: SiteConfig = {
     copyright: '© 2024 VELORA. The Art of Chocolate.',
     bottomLinks: ['Luxury Design', 'Ecommerce That Sells', 'Storytelling'],
   },
+  gifts: {
+    badge: 'The Perfect Present',
+    headline: 'Give The Gift',
+    headlineItalic: 'of Velora.',
+    subheadline: 'Beautifully packaged in our signature noir boxes, finished with a golden ribbon and a personalized handwritten note.',
+    featured: { name: 'The Gold Collection Gift Box', desc: '12-Piece Assorted Chocolates', price: 64.00 },
+    features: [
+      { iconName: 'truck',   title: 'Same-Day Delivery',  desc: 'Available for selected cities when ordered before 2 PM. Fresh to your door.' },
+      { iconName: 'gift',    title: 'Send As A Gift',     desc: 'Add a custom message and hide the price. We handle the rest.' },
+      { iconName: 'map-pin', title: 'Track Your Order',   desc: 'Real-time updates from our kitchen all the way to their door.' },
+    ],
+  },
+  collectionsImages: {
+    dark:     '',
+    pralines: '',
+    gifts:    '',
+  },
   products: [
     { id: 1,  name: 'Hazelnut Praline Box',      desc: '12 Pieces',           price: 42, category: 'Pralines', tag: 'Bestseller', imageUrl: '', objectPosition: '10% 60%', visible: true },
     { id: 2,  name: 'Velvet Truffles',            desc: '16 Pieces',           price: 36, category: 'Truffles', tag: 'Bestseller', imageUrl: '', objectPosition: '50% 60%', visible: true },
@@ -171,7 +206,6 @@ function loadConfig(): SiteConfig {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return DEFAULT_CONFIG;
     const parsed = JSON.parse(saved);
-    // Deep merge: keep DEFAULT_CONFIG as fallback for any missing keys
     return deepMerge(DEFAULT_CONFIG, parsed);
   } catch { return DEFAULT_CONFIG; }
 }

@@ -1,17 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Truck, Gift, MapPin, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { useState } from 'react';
+import { useSiteConfig } from '@/context/SiteConfigContext';
+import type { GiftFeature } from '@/context/SiteConfigContext';
 
-const GIFT_BOX = { id: 10, name: 'The Gold Collection Gift Box', desc: '12-Piece Assorted Chocolates', price: 64.00 };
+const ICON_MAP: Record<string, React.ElementType> = {
+  truck:     Truck,
+  gift:      Gift,
+  'map-pin': MapPin,
+};
+
+function FeatureIcon({ name }: { name: string }) {
+  const Icon = ICON_MAP[name] ?? Gift;
+  return <Icon className="w-5 h-5" />;
+}
 
 export default function Gifts() {
+  const { config } = useSiteConfig();
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
+  const g = config.gifts;
+  const featuredId = 10; // stable cart id for the featured gift
+
   const handleAdd = () => {
-    addItem(GIFT_BOX);
+    addItem({ id: featuredId, name: g.featured.name, desc: g.featured.desc, price: g.featured.price });
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
   };
@@ -34,26 +48,27 @@ export default function Gifts() {
             className="flex-1 w-full"
           >
             <div className="relative bg-gradient-to-br from-card to-background border border-primary/25 rounded-3xl p-8 md:p-12 group overflow-hidden">
-              {/* Ambient glow */}
               <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
               <div className="relative z-10 mb-8">
-                <span className="text-primary font-medium tracking-[0.25em] uppercase text-xs mb-4 block">The Perfect Present</span>
+                <span className="text-primary font-medium tracking-[0.25em] uppercase text-xs mb-4 block">
+                  {g.badge}
+                </span>
                 <h2 className="text-4xl md:text-5xl font-serif leading-[1.1] mb-4">
-                  Give The Gift <br />
-                  <span className="italic text-primary">of Velora.</span>
+                  {g.headline} <br />
+                  <span className="italic text-primary">{g.headlineItalic}</span>
                 </h2>
                 <p className="text-foreground/60 text-base max-w-md leading-relaxed">
-                  Beautifully packaged in our signature noir boxes, finished with a golden ribbon and a personalized handwritten note.
+                  {g.subheadline}
                 </p>
               </div>
 
               <div className="relative z-10 p-5 bg-background/60 backdrop-blur-sm border border-border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 hover:border-primary/40 transition-colors">
                 <div className="text-left">
-                  <h3 className="text-xl font-serif mb-1">{GIFT_BOX.name}</h3>
-                  <p className="text-sm text-foreground/50 mb-3">{GIFT_BOX.desc}</p>
-                  <div className="text-2xl font-serif text-primary">${GIFT_BOX.price.toFixed(2)}</div>
+                  <h3 className="text-xl font-serif mb-1">{g.featured.name}</h3>
+                  <p className="text-sm text-foreground/50 mb-3">{g.featured.desc}</p>
+                  <div className="text-2xl font-serif text-primary">${Number(g.featured.price).toFixed(2)}</div>
                 </div>
 
                 <motion.button
@@ -73,13 +88,9 @@ export default function Gifts() {
 
           {/* Feature cards */}
           <div className="w-full lg:w-80 flex flex-col gap-4 shrink-0">
-            {[
-              { Icon: Truck, title: 'Same-Day Delivery', desc: 'Available for selected cities when ordered before 2 PM. Fresh to your door.' },
-              { Icon: Gift, title: 'Send As A Gift', desc: 'Add a custom message and hide the price. We handle the rest.' },
-              { Icon: MapPin, title: 'Track Your Order', desc: 'Real-time updates from our kitchen all the way to their door.' },
-            ].map(({ Icon, title, desc }, idx) => (
+            {g.features.map((feat: GiftFeature, idx: number) => (
               <motion.div
-                key={title}
+                key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -88,11 +99,11 @@ export default function Gifts() {
                 className="bg-card/60 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-start gap-4 hover:bg-card hover:border-primary/20 transition-all duration-300 cursor-default"
               >
                 <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
-                  <Icon className="w-5 h-5" />
+                  <FeatureIcon name={feat.iconName} />
                 </div>
                 <div>
-                  <h4 className="font-medium text-base mb-1.5">{title}</h4>
-                  <p className="text-sm text-foreground/55 leading-relaxed">{desc}</p>
+                  <h4 className="font-medium text-base mb-1.5">{feat.title}</h4>
+                  <p className="text-sm text-foreground/55 leading-relaxed">{feat.desc}</p>
                 </div>
               </motion.div>
             ))}

@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
-import heroImage from '@assets/Image-396_1784381276324.jpg';
+import defaultHeroImage from '@assets/Image-396_1784381276324.jpg';
 import FloatingChocolates from './FloatingChocolates';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 
 // Melt animation: chocolate bar grid cells break apart frame by frame
 const GRID_COLS = 3;
@@ -158,6 +159,8 @@ export default function Hero() {
   const rotateX = useTransform(mouseY, [-500, 500], [15, -15]);
   const rotateY = useTransform(mouseX, [-500, 500], [-15, 15]);
   const [, navigate] = useLocation();
+  const { config } = useSiteConfig();
+  const bgImage = config.hero.backgroundImageUrl || defaultHeroImage;
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -173,7 +176,7 @@ export default function Hero() {
       {/* Background hero image */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center opacity-25 mix-blend-luminosity"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{ backgroundImage: `url(${bgImage})` }}
       />
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-background/50 via-background/75 to-background" />
 

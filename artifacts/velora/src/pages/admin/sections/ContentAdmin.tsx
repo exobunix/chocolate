@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
+import type { GiftFeature } from '@/context/SiteConfigContext';
+import ImagePicker from '../ImagePicker';
+
+const ICON_OPTIONS = [
+  { value: 'truck',   label: '🚚 Truck (Delivery)' },
+  { value: 'gift',    label: '🎁 Gift' },
+  { value: 'map-pin', label: '📍 Map Pin (Tracking)' },
+];
 
 function Section({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -41,38 +49,49 @@ export default function ContentAdmin() {
   const [marquee, setMarquee] = useState(config.marquee.words);
   const [testimonials, setTestimonials] = useState(config.testimonials);
   const [process, setProcess] = useState(config.process);
+  const [gifts, setGifts] = useState(config.gifts);
+  const [collectionsImages, setCollectionsImages] = useState(config.collectionsImages);
   const [saved, setSaved] = useState<Record<string, boolean>>({});
 
-  const save = (key: string, data: any) => {
-    updateConfig({ [key]: data });
+  const save = (key: string, data: unknown) => {
+    updateConfig({ [key]: data } as any);
     setSaved(s => ({ ...s, [key]: true }));
     setTimeout(() => setSaved(s => ({ ...s, [key]: false })), 2000);
   };
 
-  const addMarqueeWord = () => setMarquee(w => [...w, '']);
+  // ── Marquee helpers
+  const addMarqueeWord    = () => setMarquee(w => [...w, '']);
   const removeMarqueeWord = (i: number) => setMarquee(w => w.filter((_, idx) => idx !== i));
-  const setMarqueeWord = (i: number, v: string) => setMarquee(w => w.map((word, idx) => idx === i ? v : word));
+  const setMarqueeWord    = (i: number, v: string) => setMarquee(w => w.map((word, idx) => idx === i ? v : word));
 
-  const addTestimonial = () => setTestimonials(t => [...t, { quote: '', author: '', role: 'Verified Buyer' }]);
+  // ── Testimonial helpers
+  const addTestimonial    = () => setTestimonials(t => [...t, { quote: '', author: '', role: 'Verified Buyer' }]);
   const removeTestimonial = (i: number) => setTestimonials(t => t.filter((_, idx) => idx !== i));
-  const setTestimonial = (i: number, k: string, v: string) =>
+  const setTestimonial    = (i: number, k: string, v: string) =>
     setTestimonials(t => t.map((item, idx) => idx === i ? { ...item, [k]: v } : item));
 
-  const setStep = (i: number, k: string, v: string) =>
+  // ── Process helpers
+  const setStep        = (i: number, k: string, v: string) =>
     setProcess(p => ({ ...p, steps: p.steps.map((s, idx) => idx === i ? { ...s, [k]: v } : s) }));
-  const addIngredient = () => setProcess(p => ({ ...p, ingredients: [...p.ingredients, ''] }));
+  const addIngredient  = () => setProcess(p => ({ ...p, ingredients: [...p.ingredients, ''] }));
   const removeIngredient = (i: number) => setProcess(p => ({ ...p, ingredients: p.ingredients.filter((_, idx) => idx !== i) }));
-  const setIngredient = (i: number, v: string) =>
+  const setIngredient  = (i: number, v: string) =>
     setProcess(p => ({ ...p, ingredients: p.ingredients.map((ing, idx) => idx === i ? v : ing) }));
+
+  // ── Gifts feature helpers
+  const setFeature = (i: number, k: keyof GiftFeature, v: string) =>
+    setGifts(g => ({ ...g, features: g.features.map((f, idx) => idx === i ? { ...f, [k]: v } : f) }));
+  const addFeature    = () => setGifts(g => ({ ...g, features: [...g.features, { iconName: 'gift', title: '', desc: '' }] }));
+  const removeFeature = (i: number) => setGifts(g => ({ ...g, features: g.features.filter((_, idx) => idx !== i) }));
 
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold mb-1">Content Editor</h1>
-        <p className="text-white/40 text-sm">Edit all visible text content across the site.</p>
+        <p className="text-white/40 text-sm">Edit all visible text and images across the site.</p>
       </div>
 
-      {/* Hero */}
+      {/* ── Hero Section ───────────────────────────────────────── */}
       <Section title="Hero Section" defaultOpen>
         <div className="space-y-4">
           <FieldRow label="Badge Text">
@@ -97,11 +116,115 @@ export default function ContentAdmin() {
               <input className="admin-input" value={hero.statsText} onChange={e => setHero(h => ({ ...h, statsText: e.target.value }))} />
             </FieldRow>
           </div>
+          <ImagePicker
+            label="Hero Background Image"
+            value={hero.backgroundImageUrl}
+            onChange={url => setHero(h => ({ ...h, backgroundImageUrl: url }))}
+            placeholder="Paste URL or pick from Media Library…"
+            previewClass="mt-2 h-28 w-full object-cover rounded-xl border border-white/10"
+          />
           <SaveBar onSave={() => save('hero', hero)} saved={!!saved.hero} />
         </div>
       </Section>
 
-      {/* Marquee */}
+      {/* ── Gifts Section ─────────────────────────────────────── */}
+      <Section title="Gifts Section (Home Page)">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <FieldRow label="Badge">
+              <input className="admin-input" value={gifts.badge} onChange={e => setGifts(g => ({ ...g, badge: e.target.value }))} />
+            </FieldRow>
+            <FieldRow label="Headline">
+              <input className="admin-input" value={gifts.headline} onChange={e => setGifts(g => ({ ...g, headline: e.target.value }))} />
+            </FieldRow>
+          </div>
+          <FieldRow label="Italic Accent">
+            <input className="admin-input" value={gifts.headlineItalic} onChange={e => setGifts(g => ({ ...g, headlineItalic: e.target.value }))} />
+          </FieldRow>
+          <FieldRow label="Subheadline">
+            <textarea rows={2} className="admin-input resize-none" value={gifts.subheadline} onChange={e => setGifts(g => ({ ...g, subheadline: e.target.value }))} />
+          </FieldRow>
+
+          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4 space-y-3">
+            <p className="text-xs text-white/40 uppercase tracking-widest">Featured Product</p>
+            <FieldRow label="Name">
+              <input className="admin-input" value={gifts.featured.name} onChange={e => setGifts(g => ({ ...g, featured: { ...g.featured, name: e.target.value } }))} />
+            </FieldRow>
+            <div className="grid grid-cols-2 gap-3">
+              <FieldRow label="Description">
+                <input className="admin-input" value={gifts.featured.desc} onChange={e => setGifts(g => ({ ...g, featured: { ...g.featured, desc: e.target.value } }))} />
+              </FieldRow>
+              <FieldRow label="Price ($)">
+                <input type="number" min="0" step="0.01" className="admin-input" value={gifts.featured.price}
+                  onChange={e => setGifts(g => ({ ...g, featured: { ...g.featured, price: parseFloat(e.target.value) || 0 } }))} />
+              </FieldRow>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs text-white/40 uppercase tracking-widest mb-3">Feature Cards</p>
+            <div className="space-y-3">
+              {gifts.features.map((feat, i) => (
+                <div key={i} className="bg-white/[0.03] border border-white/5 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-white/30">Card {i + 1}</span>
+                    {gifts.features.length > 1 && (
+                      <button onClick={() => removeFeature(i)} className="p-1 text-white/20 hover:text-red-400 transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Icon</label>
+                      <select value={feat.iconName} onChange={e => setFeature(i, 'iconName', e.target.value)} className="admin-input">
+                        {ICON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Title</label>
+                      <input className="admin-input" value={feat.title} onChange={e => setFeature(i, 'title', e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 uppercase tracking-widest mb-1.5">Description</label>
+                      <input className="admin-input" value={feat.desc} onChange={e => setFeature(i, 'desc', e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={addFeature} className="flex items-center gap-2 text-sm text-[#c9a84c] hover:underline mt-3">
+              <Plus className="w-4 h-4" /> Add Feature Card
+            </button>
+          </div>
+          <SaveBar onSave={() => save('gifts', gifts)} saved={!!saved.gifts} />
+        </div>
+      </Section>
+
+      {/* ── Collections Images ────────────────────────────────── */}
+      <Section title="Collections Page — Tab Images">
+        <div className="space-y-4">
+          <p className="text-xs text-white/30 -mt-1">Override the background image for each collection tab. Leave empty to use defaults.</p>
+          <ImagePicker
+            label="Dark Chocolate Tab Image"
+            value={collectionsImages.dark}
+            onChange={url => setCollectionsImages(c => ({ ...c, dark: url }))}
+          />
+          <ImagePicker
+            label="Pralines & Truffles Tab Image"
+            value={collectionsImages.pralines}
+            onChange={url => setCollectionsImages(c => ({ ...c, pralines: url }))}
+          />
+          <ImagePicker
+            label="Gift Collections Tab Image"
+            value={collectionsImages.gifts}
+            onChange={url => setCollectionsImages(c => ({ ...c, gifts: url }))}
+          />
+          <SaveBar onSave={() => save('collectionsImages', collectionsImages)} saved={!!saved.collectionsImages} />
+        </div>
+      </Section>
+
+      {/* ── Marquee ───────────────────────────────────────────── */}
       <Section title="Marquee Banner Words">
         <div className="space-y-3 mb-4">
           {marquee.map((word, i) => (
@@ -120,7 +243,7 @@ export default function ContentAdmin() {
         <SaveBar onSave={() => save('marquee', { words: marquee })} saved={!!saved.marquee} />
       </Section>
 
-      {/* Testimonials */}
+      {/* ── Testimonials ──────────────────────────────────────── */}
       <Section title="Testimonials">
         <div className="space-y-6 mb-4">
           {testimonials.map((t, i) => (
@@ -146,7 +269,7 @@ export default function ContentAdmin() {
         <SaveBar onSave={() => save('testimonials', testimonials)} saved={!!saved.testimonials} />
       </Section>
 
-      {/* Process Section */}
+      {/* ── Process ───────────────────────────────────────────── */}
       <Section title="Process / Craft Section">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">

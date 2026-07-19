@@ -50,9 +50,19 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="z-50 flex flex-col leading-none">
-          <span className="text-2xl font-serif tracking-[0.25em] text-[#c9a84c]">{config.site.logoText}</span>
-          <span className="text-[9px] tracking-[0.3em] text-[#c9a84c]/50 uppercase">{config.site.tagline}</span>
+        <Link href="/" className="z-50 flex items-center gap-3 leading-none">
+          {config.site.logoImageUrl ? (
+            <img
+              src={config.site.logoImageUrl}
+              alt={config.site.logoText}
+              className="h-9 w-auto object-contain"
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+          ) : null}
+          <div className="flex flex-col leading-none">
+            <span className="text-2xl font-serif tracking-[0.25em] text-[#c9a84c]">{config.site.logoText}</span>
+            <span className="text-[9px] tracking-[0.3em] text-[#c9a84c]/50 uppercase">{config.site.tagline}</span>
+          </div>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

@@ -13,31 +13,31 @@ const FALLBACK_IMAGES = [heroImg, collectionsImg, processImg];
 
 const COLLECTION_META = [
   {
-    id: 'dark',
+    id: 'dark' as const,
     label: 'Dark Chocolate',
     categories: ['Bars'],
     headline: 'Pure. Intense. Unforgettable.',
     sub: 'Our signature single-origin dark bars sourced from the finest cacao farms in Ecuador and Ghana.',
     color: 'from-[#1a0a05] to-[#0d0502]',
-    image: heroImg,
+    defaultImage: heroImg,
   },
   {
-    id: 'pralines',
+    id: 'pralines' as const,
     label: 'Pralines & Truffles',
     categories: ['Pralines', 'Truffles'],
     headline: 'Crafted with obsessive precision.',
     sub: 'Each praline is hand-rolled and finished individually by our master chocolatiers every morning.',
     color: 'from-[#2a1309] to-[#180a04]',
-    image: collectionsImg,
+    defaultImage: collectionsImg,
   },
   {
-    id: 'gifts',
+    id: 'gifts' as const,
     label: 'Gift Collections',
     categories: ['Gifts'],
     headline: 'The gift they never forget.',
     sub: 'Curated gift boxes wrapped in our signature noir packaging with a hand-tied gold ribbon.',
     color: 'from-[#c9a84c]/20 to-[#1a0a05]',
-    image: processImg,
+    defaultImage: processImg,
   },
 ];
 
@@ -81,6 +81,7 @@ export default function CollectionsPage() {
   const { config } = useSiteConfig();
   const [active, setActive] = useState('dark');
   const current = COLLECTION_META.find(c => c.id === active)!;
+  const currentImage = config.collectionsImages[current.id] || current.defaultImage;;
 
   const visibleProducts = config.products.filter(p => p.visible);
   const currentProducts = visibleProducts.filter(p => current.categories.includes(p.category));
@@ -124,7 +125,7 @@ export default function CollectionsPage() {
             className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Image */}
             <div className="aspect-[4/3] rounded-2xl overflow-hidden relative border border-border/30">
-              <img src={current.image} alt={current.label} className="w-full h-full object-cover" />
+              <img src={currentImage} alt={current.label} className="w-full h-full object-cover" />
               <div className={`absolute inset-0 bg-gradient-to-tr ${current.color} opacity-40`} />
               <div className="absolute bottom-8 left-8">
                 <div className="inline-block px-4 py-1.5 bg-primary/20 backdrop-blur-sm border border-primary/30 rounded-full text-xs tracking-widest uppercase text-primary">
